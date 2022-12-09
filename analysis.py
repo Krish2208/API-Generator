@@ -48,9 +48,9 @@ def clean_df(df):
 
     Returns
     -------
-    df: Pandas Dataframe
+    cleaned_df: Pandas Dataframe
         Returns the Dataframe after extracting Date,
-        Time and removing NaN value columns
+        Time and removing NaN value columns/rows
     '''
 
     for i in range(len(df)):
@@ -61,8 +61,9 @@ def clean_df(df):
             df.TIMESTAMP[i] = x.strftime('%d/%m/%Y %H:%M:%S')
         except:
             continue
-    return df.loc[:, df.isna().mean()==1.0]
-
+    df = df.loc[:, df.isna().mean()<0.95]
+    cleaned_df = df.dropna(thresh=len(df.axes[1])-2)
+    return cleaned_df
 
 def get_csv(file):
     '''
@@ -83,14 +84,11 @@ def get_csv(file):
     raw_logs = file.read()
     logs = raw_logs.split("\n")
     all_entities = []
-    for log in tqdm(logs[:100]):
+    for log in tqdm(logs):
         doc = nlp(log)
         entities = get_dict(doc.ents)
-        for i in entities.values():
-            if i is not None:
-                entities["LOG"] = log
-                all_entities.append(entities)
-                break
+        entities["LOG"] = log
+        all_entities.append(entities)
     df = pd.DataFrame(all_entities)
     df = clean_df(df)
     return df
