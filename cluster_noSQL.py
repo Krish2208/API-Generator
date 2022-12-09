@@ -10,7 +10,9 @@ from sklearn.cluster import DBSCAN
 from sklearn import metrics
 import matplotlib.pyplot as plt
 from datetime import datetime
-#Remember 0: update, 1: get, 2: delete, 3: insert, 4: misc
+import re
+#Remember 0: update, 1: get, 2: delete, 3: insert_one, 4: insertMany 5: misc
+
 def validate_date(date_text):
     try:
         datetime.strptime(date_text, '%Y-%m-%d')
@@ -18,41 +20,42 @@ def validate_date(date_text):
     except ValueError:
         return False
 
+split= []
+final_api= []
 
-split= [] #contains a list 
-final_api= [] #contain all the APIs irrespective of the type of query
-num_of_types_of_queries= {}
 
 def splitter(path):
-    update = []
-    get = []
-    delete = []
-    insert = []
-    misc = []
-    queries = pd.read_csv(path)
+    insert_one= []
+    insert_many= []
+    get= []
+    update= []
+    delete= []
+    misc= []
+    queries= pd.read_csv('')
     for i in range(0, len(queries)):
-        queries.iat[i, 0]= queries.iat[i, 0].lower()
-        if((queries.iat[i, 0])[slice(6)]=='select'):
-            get.append(queries.iat[i, 0])
-        elif((queries.iat[i, 0])[slice(6)]=='update'):
-            update.append(queries.iat[i, 0])
-        elif((queries.iat[i, 0])[slice(6)]=='delete'):
-            delete.append(queries.iat[i, 0])
-        elif((queries.iat[i, 0])[slice(6)]=='insert'):
-            insert.append(queries.iat[i, 0])
+        queries.iat[i, 0]= queries.iat[i,0].lower()
+        txt= queries.iat[i, 0]
+        x= re.split(r'[.()]', txt)
+        if('insert' in x):
+          insert_one.append(txt)
+        elif('insertMany' in x):
+          insert_many.append(txt)
+        elif('find' in x):
+          get.append(txt)
+        elif('update' in x):
+          update.append(txt)
+        elif('remove' in x):
+          delete.append(txt)
         else:
-            misc.append(queries.iat[i, 0]) 
+          misc.append(txt)
     split.append(update) #0 is update
     split.append(get) #1 is get
     split.append(delete) #2 is delete 
-    split.append(insert) #3 is insert
-    split.append(misc) #4 is misc
+    split.append(insert_one) #3 is insert_one
+    split.append(insert_many) #4 is insertMany
+    split.append(misc) #5 is misc
     return split
 
-def num_queries(split):
-    for i in range(0, len(split)):
-        num_of_types_of_queries[i]= len(split[i])
-    return num_of_types_of_queries
 
 def gen_module(get):
     tokenizer = Tokenizer(
@@ -116,8 +119,7 @@ def gen_module(get):
     final_api.append(get_final_commands)
     return final_api
 
-
-#example to run the functions
+#example
 path= '/content/Queries_compile.csv'
 split= splitter(path)
 for i in range(0, len(split)):
