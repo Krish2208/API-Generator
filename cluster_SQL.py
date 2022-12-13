@@ -77,8 +77,8 @@ def gen_module(get):
     train_embedded= pca.fit_transform(training_padded)
     scaler= MinMaxScaler()
     train_scaled= scaler.fit_transform(train_embedded)
-    model63 = DBSCAN(eps=0.04,
-               min_samples=10,
+    model63 = DBSCAN(eps=0.03,
+               min_samples=30,
                metric='euclidean',
                metric_params=None,
                algorithm='auto',
