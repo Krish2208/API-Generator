@@ -24,13 +24,17 @@ split= [] #contains a list
 final_api= [] #contain all the APIs irrespective of the type of query
 num_of_types_of_queries= {}
 
-def splitter(path):
+def splitter(file):
     update = [] #initialise empty lists for the main 5 types of queries
-    get = []
+    get = [] #read
     delete = []
     insert = []
     misc = []
-    queries = pd.read_csv(path)
+    # file = pd.to_frame(file)
+    queries = file['QUERY']
+    queries = queries.to_frame()
+    print(type(queries),"1")
+    print(queries.iat[5, 0])
     for i in range(0, len(queries)):
         queries.iat[i, 0]= queries.iat[i, 0].lower()
         if((queries.iat[i, 0])[slice(6)]=='select'):
@@ -119,14 +123,3 @@ def gen_module(get):
     final_api.append(get_final_commands)
     return final_api
 
-
-#example to run the functions
-path= '/content/Queries_compile.csv'
-split= splitter(path)
-for i in range(0, len(split)):
-  try:
-    final_api= gen_module(split[i])
-  except ValueError:
-    print('No values')
-final_api= pd.DataFrame(final_api)
-final_api.to_csv('final.csv')

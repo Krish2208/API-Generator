@@ -80,7 +80,6 @@ def get_csv(file):
         Returns the complete cleaned dataframe
         with log and labelled information
     '''
-
     raw_logs = file.read()
     logs = raw_logs.split("\n")
     all_entities = []
