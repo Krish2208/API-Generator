@@ -21,7 +21,7 @@ def validate_date(date_text):
 
 
 split= [] #contains a list 
-final_api= [] #contain all the APIs irrespective of the type of query
+final_api= pd.DataFrame(columns=['text', 'datatype']) #contain all the APIs irrespective of the type of query
 num_of_types_of_queries= {}
 
 def splitter(file):
@@ -77,8 +77,8 @@ def gen_module(get):
     train_embedded= pca.fit_transform(training_padded)
     scaler= MinMaxScaler()
     train_scaled= scaler.fit_transform(train_embedded)
-    model63 = DBSCAN(eps=0.04,
-               min_samples=10,
+    model63 = DBSCAN(eps=0.03,
+               min_samples=30,
                metric='euclidean',
                metric_params=None,
                algorithm='auto',
@@ -90,10 +90,10 @@ def gen_module(get):
     get= pd.DataFrame(get)
     get['class']= clm63.labels_ #adds class to each query based upon the cluster
     get= get.sort_values(by=['class'])
-    get_class={} #initialize a dictionary to store the APIs 
+    get_class={} #initialize a dictionary to store the APIs
+    final_command= pd.DataFrame(columns=['text', 'datatype'])
     for i in range(0, max(clm63.labels_)+1):
         get_class[i]= get.loc[get['class']==i]
-    get_final_commands= []
     for i in range(0, max(clm63.labels_)+1):
         fin_seq = tokenizer.texts_to_sequences(get_class[i].loc[:,0])
         fin_padded = pad_sequences(fin_seq,maxlen=100, 
@@ -108,18 +108,15 @@ def gen_module(get):
         for k in range(0, len(final)):
             if(final[k]!=0 and k<len(x)):
                 conflicts.append(k) #notes the conflicts locations
-                x[k]= '{}' #replaces conflict points with placeholder
-                if(x[k].isnumeric()==True):
+                if(x[k].isnumeric()):
                     datatype.append('int')
-                elif(validate_date(x[k])==True):
+                elif(validate_date(x[k])):
                     datatype.append('date')
                 else:
                     datatype.append('str')
-        k={}
-        k['text']= (" ".join(x))
-        k['datatype']= datatype
-        get_final_commands.append(k)
-    get_final_commands= pd.DataFrame(get_final_commands)
-    final_api.append(get_final_commands)
+                x[k]= '{}' #replaces conflict points with placeholder
+        final_command.loc[i, 'text']= (" ".join(x))
+        final_command.loc[i, 'datatype']= datatype
+    final_api= final_command.drop_duplicates(subset=['text'])
     return final_api
 
