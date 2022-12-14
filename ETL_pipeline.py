@@ -47,9 +47,10 @@ class ETL:
                 final_api.to_csv(f'./static/final{splits.index(i)}.csv',index=False,header=True)
             except ValueError:
                 print('No values')
+        etl.createNameSelectQuery()
 
 
-    def createNameQuery(self):
+    def createNameSelectQuery(self):
         df = pd.read_csv('./static/final1.csv')
         queries = df['text']
         names = []
@@ -63,11 +64,10 @@ class ETL:
             list_of_words = i.split()
             if 'from' in list_of_words:
                 list_of_words[list_of_words.index('from')]='From'
-            if list_of_words[0] == 'select':
-                etl = ETL()
-                name,detail = etl.select(list_of_words)
-                names.append(name)
-                details.append(detail)
+            etl = ETL()
+            name,detail = etl.select(list_of_words)
+            names.append(name)
+            details.append(detail)
         df['name'] = names
         df['detail'] = details
         df.to_csv('./static/final1.csv')

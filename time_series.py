@@ -136,7 +136,7 @@ def model_creation(epochs,batch_size,x_train):
     model.compile(optimizer="adam", loss="mean_squared_error")
     return model,epochs,batch_size
 
-def prediction(model,x_test,y_test):
+def prediction(model,x_test,y_test,scaler4):
     # Get the predicted values
     y_pred = model.predict(x_test)
     y_pred= y_pred.reshape((130,))
@@ -180,7 +180,7 @@ def main(path,path_to_save):
     x_train,x_test,y_train,y_test,scaler4 = create_data(sequence_length = sequence_length,train_data = train_data,test_data = test_data)
     model,epochs,batch_size = model_creation(20,1,x_train)
     history = model.fit(x_train, y_train, batch_size=batch_size, epochs=epochs)
-    y_pred_unscaled,y_test_unscaled = prediction(model,x_test,y_test)
+    y_pred_unscaled,y_test_unscaled = prediction(model,x_test,y_test,scaler4)
     MAE,MAPE,MDAPE = error_analysis(y_test_unscaled, y_pred_unscaled)
     y_pred_unscaled= y_pred_unscaled.reshape(130)
     df_valid_pred = df_count[train_data_len:]
@@ -189,3 +189,5 @@ def main(path,path_to_save):
     model.save_weights(path_to_save)
     return 0
 ##try to put a try and except command
+
+main()
