@@ -58,7 +58,7 @@ def clean_df(df):
             x = parser.parse(df.TIMESTAMP[i])
             df.DATE[i] = x.strftime('%d/%m/%Y')
             df.TIME[i] = x.strftime('%H:%M:%S')
-            df.TIMESTAMP[i] = x.strftime('%d/%m/%Y %H:%M:%S')
+            df.TIMESTAMP[i] = x.strftime('%d %m %Y %H %M %S')
         except:
             continue
     df = df.loc[:, df.isna().mean()<0.95]

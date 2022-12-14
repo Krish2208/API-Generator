@@ -1,0 +1,3 @@
+text,datatype
+insert into player values {} {} {},"['str', 'str', 'str']"
+"insert into player values {} {} 00:00:00',2,null,1)","['str', 'str']"

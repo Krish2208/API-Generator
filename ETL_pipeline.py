@@ -34,7 +34,7 @@ class ETL:
         return csv_file
 
     def countQueries(self):
-        df = pd.read_csv('.\static\mysql.csv', squeeze=False,header=0)
+        df = pd.read_csv('./static/mysql.csv', squeeze=False,header=0)
         splits = splitter(df)
         return splits
 
@@ -117,6 +117,7 @@ class ETL:
         if len(first)>1:
             name = name + 'Details' 
         else:
+            print(first)
             name = name + first[0].capitalize()
         if len(third)!=0:
             try:
@@ -141,30 +142,32 @@ class ETL:
                 string = string.replace(ele, "")
         return string
 
-    def dfconcat(self):
-        for i in range(4):
-            dfs=[]
-            try:
-                df = pd.read_csv(f'./static/file{i}')
-                dfs.append(df)
-            except FileNotFoundError:
-                print('file not found')
-        dataframes = pd.concat(dfs)
-        dataframes.to_csv('./static/execute.csv')
+    # def dfconcat(self):
+        # for i in range(4):
+        #     dfs=[]
+        #     try:
+        #         df = pd.read_csv(f'./static/file{i}')
+        #         dfs.append(df)
+        #     except FileNotFoundError:
+        #         print('file not found')
+        # dataframes = pd.concat(dfs)
+        # dataframes = pd.read_csv("./static/final1.csv")
+        # dataframes.to_csv('./static/execute.csv')
 
     def findQuery(self,query_name,query_info):
-        df = pd.read_csv('./static/execute.csv')
-        query = df['text'].where(df['name'] == query_name)
-        datatype = df['datatype'].where(df['name'] == query_name)
-        data = tuple()
-        if datatype:
-            for i in datatype:
-                if i=='int':
-                    data.append(int(i))
-                elif i=='str' or i=='date':
-                    data.append("'"+i+"'")
+        df = pd.read_csv('./static/final1.csv')
+        df = df[df['name'] == query_name]
+        query = df.text.iloc[0]
+        datatype = df.datatype.iloc[0]
+        data = []
+        if len(datatype)>0:
+            for i in range(len(query_info)):
+                data.append(int(query_info[i]))
+                # if datatype[i]=='int':
+                # elif (type(query_info[i])=='str' and datatype[i]=='str') or (type(query_info[i])=='str' and datatype[i]=='date'):
+                #     data.append("'"+i+"'")
         if '{}' in query:
-            query.format(*data)
+            query = query.format(*tuple(data))
         return query
 
     def executeAPISQL(self,username,password,host_url,database,query_name,port,query_info):
@@ -174,10 +177,28 @@ class ETL:
         database=database,
         host=host_url,
         port=port)
-        cursor = connect.cursor()
+        cursor = connect.cursor(buffered=True)
         etl=ETL()
         query = etl.findQuery(query_name,query_info)
         cursor.execute(query)
-        cursor.close()
-        connect.commit()
-        connect.close()
+        if "read" in query_name[0:6]:
+            x = cursor.fetchall()
+            cursor.close()
+            connect.commit()
+            connect.close()
+            return x
+        elif "create" in query_name[0:6]:
+            cursor.close()
+            connect.commit()
+            connect.close()
+            return "Created Successfully"
+        elif "update" in query_name[0:6]:
+            cursor.close()
+            connect.commit()
+            connect.close()
+            return "Updated Successfully"
+        else:
+            cursor.close()
+            connect.commit()
+            connect.close()
+            return "Deleted Successfully"

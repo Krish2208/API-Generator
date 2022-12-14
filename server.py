@@ -57,13 +57,13 @@ def connection():
         username = info.get('username')
         password = info.get('password')
         database = info.get('database')
-        host_url = info.get('platform')
+        host_url = info.get('host_url')
         query_name = info.get('query_name')
         query_info = info.get('query_info')
         port=info.get('port')
         etl=ETL()
-        etl.dfconcat()
-        etl.executeAPISQL(username,password,host_url,database,query_name,port)
+        # etl.dfconcat()
+        etl.executeAPISQL(username,password,host_url,database,query_name,port,query_info)
         return {'username': username, 'password':password, 'database':database, 'host_url':host_url,'query_name':query_name,'port':port,'query_info':query_info}, status.HTTP_201_CREATED
     else:
         return status.HTTP_400_BAD_REQUEST
