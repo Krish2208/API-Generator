@@ -9,7 +9,6 @@ class ETL:
         self.variables = 0;
 
     def analysis_module(self,file):
-
         """
         analysis module is being used
         for getting the csv file after
@@ -27,18 +26,19 @@ class ETL:
         ------------
             csv file: derived from the log file using ner model
         """
-        file.save('./static/mysql.log')
-        with open('./static/mysql.log','r') as log_file:
+        file.save('./static/chinook2.log')
+        with open('./static/chinook2.log','r') as log_file:
             print(log_file)
             csv_file = get_csv(log_file)
             # df = pd.read_csv(csv_file)
-        csv_file.to_csv('./static/mysql.csv')
+        csv_file.to_csv('./static/chinook2.csv')
         return csv_file
 
     def countQueries(self):
-        df = pd.read_csv(r'D:\projects\API\api-backend\static\mysql.csv', squeeze=False,header=0)
+        df = pd.read_csv(r'D:\projects\API\api-generator-backend\API-Generator\static\mysql.csv', squeeze=False,header=0)
         print(type(df),"2")
         splits = splitter(df)
+        print(splits)
         return splits
 
     def getQueriesSQL(self):
@@ -76,7 +76,6 @@ class ETL:
                 name_dict['name'] = name
                 name_dict['details'] = detail
                 names.append(name_dict)
-                print(names)
         return names 
                 
     def select(self,words):
@@ -89,7 +88,9 @@ class ETL:
                 index = words.index(i)
                 i=i[i.index('.')+1::]
                 words[index] = i
-                print(i)
+                # print(worṇds)
+
+        for i in words[1::]:
             if i=='From':
                 index = words.index(i)
                 break;
@@ -124,10 +125,18 @@ class ETL:
             name = name + first[0].capitalize()
         if len(third)!=0:
             try:
-                name = name +'By'+ third[third.index('{}')-2].capitalize()
+                if third.count('{}')>1:
+                    name = name +'By'+ third[third.index('{}')-2].capitalize()
+                    a = third[third.index('{}')-2].capitalize()
+                    third.remove('{}')
+                    for j in range(third.count('{}')):
+                        if third[third.index('{}')-2].capitalize()!=a:
+                            name = name+'And'+third[third.index('{}')-2].capitalize()
+                else:
+                    name = name +'By'+ third[third.index('{}')-2].capitalize()
             except ValueError:
                 name = name +'By'+ third[third.index('=')-1].capitalize()
-
+        print(name)
         return name,first
 
     
