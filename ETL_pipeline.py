@@ -2,14 +2,13 @@
 from analysis import get_csv
 import pandas as pd
 from cluster_SQL import splitter,gen_module
-from mysql_connector import mysql_connection
+import mysql.connector
 
 class ETL:
     def __init__(self):
         self.variables = 0;
 
     def analysis_module(self,file):
-
         """
         analysis module is being used
         for getting the csv file after
@@ -29,15 +28,13 @@ class ETL:
         """
         file.save('./static/mysql.log')
         with open('./static/mysql.log','r') as log_file:
-            print(log_file)
             csv_file = get_csv(log_file)
             # df = pd.read_csv(csv_file)
         csv_file.to_csv('./static/mysql.csv', index=False, header=True)
         return csv_file
 
     def countQueries(self):
-        df = pd.read_csv('./static/mysql.csv', squeeze=False,header=0)
-        print(type(df),"2")
+        df = pd.read_csv('.\static\mysql.csv', squeeze=False,header=0)
         splits = splitter(df)
         return splits
 
@@ -47,18 +44,17 @@ class ETL:
         for i in splits:
             try:
                 final_api= gen_module(i)
-                print(final_api)
+                final_api.to_csv(f'./static/final{splits.index(i)}.csv',index=False,header=True)
             except ValueError:
                 print('No values')
-        final_api= pd.DataFrame(final_api)
-        print(final_api)
-        final_api.to_csv('./static/final.csv',index=False,header=True)
-        return final_api
+        etl.createNameSelectQuery()
 
-    def createNameQuery(self):
-        df = pd.read_csv('./static/final.csv')
+
+    def createNameSelectQuery(self):
+        df = pd.read_csv('./static/final1.csv')
         queries = df['text']
         names = []
+        details=[]
         for i in queries:
             i = i.lower()
             etl = ETL()
@@ -68,16 +64,14 @@ class ETL:
             list_of_words = i.split()
             if 'from' in list_of_words:
                 list_of_words[list_of_words.index('from')]='From'
-            if list_of_words[0] == 'select':
-                etl = ETL()
-                name,detail = etl.select(list_of_words)
-                names = []
-                name_dict = {}
-                name_dict['name'] = name
-                name_dict['details'] = detail
-                names.append(name_dict)
-                print(names)
-        return names 
+            etl = ETL()
+            name,detail = etl.select(list_of_words)
+            names.append(name)
+            details.append(detail)
+        df['name'] = names
+        df['detail'] = details
+        df.to_csv('./static/final1.csv')
+        return df 
                 
     def select(self,words):
         select_dict={}
@@ -89,7 +83,9 @@ class ETL:
                 index = words.index(i)
                 i=i[i.index('.')+1::]
                 words[index] = i
-                print(i)
+             
+
+        for i in words[1::]:
             if i=='From':
                 index = words.index(i)
                 break;
@@ -124,10 +120,17 @@ class ETL:
             name = name + first[0].capitalize()
         if len(third)!=0:
             try:
-                name = name +'By'+ third[third.index('{}')-2].capitalize()
+                if third.count('{}')>1:
+                    name = name +'By'+ third[third.index('{}')-2].capitalize()
+                    a = third[third.index('{}')-2].capitalize()
+                    third.remove('{}')
+                    for j in range(third.count('{}')):
+                        if third[third.index('{}')-2].capitalize()!=a:
+                            name = name+'And'+third[third.index('{}')-2].capitalize()
+                else:
+                    name = name +'By'+ third[third.index('{}')-2].capitalize()
             except ValueError:
                 name = name +'By'+ third[third.index('=')-1].capitalize()
-
         return name,first
 
     
@@ -137,14 +140,44 @@ class ETL:
             if ele in punc:
                 string = string.replace(ele, "")
         return string
-        
-    # def executeAPISQL(self,id,username,password,host_url,database,port):
-    #     df = pd.read_csv("./static/file.csv")
-    #     query = df[id]
-    #     mysql_connection(username,password,database,host_url,query,port)
-        
-    # def executeAPINoSQL(self,id,username,password,host_url,database,port):
-    #     a=0
 
-# etl = ETL()
-# etl.createNameQuery()
+    def dfconcat(self):
+        for i in range(4):
+            dfs=[]
+            try:
+                df = pd.read_csv(f'./static/file{i}')
+                dfs.append(df)
+            except FileNotFoundError:
+                print('file not found')
+        dataframes = pd.concat(dfs)
+        dataframes.to_csv('./static/execute.csv')
+
+    def findQuery(self,query_name,query_info):
+        df = pd.read_csv('./static/execute.csv')
+        query = df['text'].where(df['name'] == query_name)
+        datatype = df['datatype'].where(df['name'] == query_name)
+        data = tuple()
+        if datatype:
+            for i in datatype:
+                if i=='int':
+                    data.append(int(i))
+                elif i=='str' or i=='date':
+                    data.append("'"+i+"'")
+        if '{}' in query:
+            query.format(*data)
+        return query
+
+    def executeAPISQL(self,username,password,host_url,database,query_name,port,query_info):
+        connect = mysql.connector.connect(
+        user=username,
+        password=password,
+        database=database,
+        host=host_url,
+        port=port)
+        cursor = connect.cursor()
+        etl=ETL()
+        query = etl.findQuery(query_name,query_info)
+        cursor.execute(query)
+        cursor.close()
+        connect.commit()
+        connect.close()
