@@ -1,6 +1,0 @@
-text,datatype
-"update player set dob = ""1972-07-08 00:00:01"" where player_id = 1",[]
-"update player set dob = ""1973-07-08 10:00:01"" where player_id = 1",[]
-"update player set dob = ""1972-07-08 00:00:00"" where player_id = 1",[]
-"update player set dob = ""1973-07-08 10:00:01"" where player_id = 2",[]
-"update player set dob = ""1972-07-08 10:00:01"" where player_id = 2",[]

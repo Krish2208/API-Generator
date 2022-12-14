@@ -68,6 +68,13 @@ def connection():
     else:
         return status.HTTP_400_BAD_REQUEST
 
+@app.route('/getapis', methods=['GET'])
+def api_details():
+    # import the module
+    etl = ETL()
+    apis = etl.getAPIs()
+    return {'apis': apis}
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',debug=True)

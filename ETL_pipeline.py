@@ -41,6 +41,7 @@ class ETL:
     def getQueriesSQL(self):
         etl = ETL()
         splits = etl.countQueries()
+        print(splits)
         for i in splits:
             try:
                 final_api= gen_module(i)
@@ -186,6 +187,7 @@ class ETL:
             cursor.close()
             connect.commit()
             connect.close()
+            print(x)
             return x
         elif "create" in query_name[0:6]:
             cursor.close()
@@ -202,3 +204,25 @@ class ETL:
             connect.commit()
             connect.close()
             return "Deleted Successfully"
+
+    def getAPIs(self):
+        df = pd.read_csv('./static/final1.csv')
+        names = df.name.tolist()
+        datatypes = df.datatype.tolist()
+        details = df.detail.tolist()
+        apis = []
+        for i in range(len(names)):
+            api = dict()
+            api["name"] = names[i]
+            api["details"] = details[i]
+            api["datatype"] = datatypes[i]
+            if "read" in api["name"]:
+                api["type"] = "read"
+            elif "create" in api["name"]:
+                api["type"] = "create"
+            elif "update" in api["name"]:
+                api["type"] = "update"
+            else:
+                api["type"] = "delete"
+            apis.append(api)
+        return apis
