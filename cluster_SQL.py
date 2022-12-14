@@ -21,7 +21,6 @@ def validate_date(date_text):
 
 
 split= [] #contains a list 
-final_api= pd.DataFrame(columns=['text', 'datatype']) #contain all the APIs irrespective of the type of query
 num_of_types_of_queries= {}
 
 def splitter(file):
@@ -33,8 +32,6 @@ def splitter(file):
     # file = pd.to_frame(file)
     queries = file['QUERY']
     queries = queries.to_frame()
-    print(type(queries),"1")
-    print(queries.iat[5, 0])
     for i in range(0, len(queries)):
         queries.iat[i, 0]= queries.iat[i, 0].lower()
         if((queries.iat[i, 0])[slice(6)]=='select'):
@@ -60,25 +57,31 @@ def num_queries(split):
     return num_of_types_of_queries #return the count of the queries of each type
 
 def gen_module(get):
+    # print(get)
+    final_api =  pd.DataFrame(columns=['text', 'datatype']) #contain all the APIs irrespective of the type of query
     tokenizer = Tokenizer(
     num_words=5000,
     filters='!"#$%&+-/:;?@[\\]^{|}~\t\n', #these will be ignored during tokenization
     lower=True, #makes all the queries in lowercase
     split=' ')
     tokenizer.fit_on_texts(get)
+    # print(tokenizer)
     word_index = tokenizer.word_index
     training_sequences = tokenizer.texts_to_sequences(get)
+    # print(training_sequences)
     training_padded = pad_sequences(training_sequences,maxlen=100, 
                                 truncating= 'post', padding='post') #all sequences are made of equal length
     # t_sne= TSNE(n_components=3, perplexity= 30, learning_rate='auto', 
     #             init='random', n_iter= 5000) #dimension reduction using t_SNE
-    # train_embedded= t_sne.fit_transform(training_padded)  
+    # train_embedded= t_sne.fit_transform(training_padded) 
+    # print(training_padded) 
     pca= PCA(n_components= 3)
     train_embedded= pca.fit_transform(training_padded)
+    print(train_embedded.shape)
     scaler= MinMaxScaler()
     train_scaled= scaler.fit_transform(train_embedded)
     model63 = DBSCAN(eps=0.03,
-               min_samples=30,
+               min_samples=10,
                metric='euclidean',
                metric_params=None,
                algorithm='auto',
@@ -87,14 +90,20 @@ def gen_module(get):
                n_jobs=None, 
               )
     clm63= model63.fit(train_scaled)
+    print(clm63.labels_)
     get= pd.DataFrame(get)
     get['class']= clm63.labels_ #adds class to each query based upon the cluster
     get= get.sort_values(by=['class'])
     get_class={} #initialize a dictionary to store the APIs
+    print("Hello")
     final_command= pd.DataFrame(columns=['text', 'datatype'])
+    print(final_command)
+    print(max(clm63.labels_)+1)
     for i in range(0, max(clm63.labels_)+1):
         get_class[i]= get.loc[get['class']==i]
+    print("hello1")
     for i in range(0, max(clm63.labels_)+1):
+        print("printhello")
         fin_seq = tokenizer.texts_to_sequences(get_class[i].loc[:,0])
         fin_padded = pad_sequences(fin_seq,maxlen=100, 
                                    truncating= 'post', padding='post')
@@ -118,5 +127,6 @@ def gen_module(get):
         final_command.loc[i, 'text']= (" ".join(x))
         final_command.loc[i, 'datatype']= datatype
     final_api= final_command.drop_duplicates(subset=['text'])
+    print(final_api)
     return final_api
 

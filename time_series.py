@@ -28,7 +28,7 @@ def read(path):
     df.drop(labels='Unnamed: 1', axis= 1, inplace=True)
     return df,row,column
 
-def split(dataframe):
+def split(dataframe,row):
     j=0
     dct = {"Nov": 11, "Dec": 12, "Jan": 1, "Feb": 2, "Mar": 3}
     df_train = pd.DataFrame(columns = ["day","month","year","hour","min","sec"])
