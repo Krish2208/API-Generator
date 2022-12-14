@@ -24,7 +24,7 @@ def analysis():
     etl = ETL()
     splits = etl.countQueries()
     create,read,update,delete,miscell = splits[3],splits[1],splits[0],splits[2],splits[4]
-    numeric = [create,read,update,delete,miscell]
+    numeric = [len(create),len(read),len(update),len(delete),len(miscell)]
     return {'numeric': numeric}
 
 # @app.route('/table', methods=['GET'])
@@ -58,7 +58,7 @@ def database():
         password = info.get('password')
         database = info.get('database')
         platform = info.get('platform')
-        host_url = info.get('platform')
+        host_url = info.get('host_url')
         query_input = info.get('query_input')
         
         if platform == 'mysql':

@@ -32,11 +32,11 @@ class ETL:
             print(log_file)
             csv_file = get_csv(log_file)
             # df = pd.read_csv(csv_file)
-        csv_file.to_csv('./static/mysql.csv')
+        csv_file.to_csv('./static/mysql.csv', index=False, header=True)
         return csv_file
 
     def countQueries(self):
-        df = pd.read_csv(r'D:\projects\API\api-backend\static\mysql.csv', squeeze=False,header=0)
+        df = pd.read_csv('./static/mysql.csv', squeeze=False,header=0)
         print(type(df),"2")
         splits = splitter(df)
         return splits
@@ -146,5 +146,5 @@ class ETL:
     # def executeAPINoSQL(self,id,username,password,host_url,database,port):
     #     a=0
 
-etl = ETL()
-etl.createNameQuery()
+# etl = ETL()
+# etl.createNameQuery()
