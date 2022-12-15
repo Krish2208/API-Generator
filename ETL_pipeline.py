@@ -159,14 +159,15 @@ class ETL:
         df = pd.read_csv('./static/final1.csv')
         df = df[df['name'] == query_name]
         query = df.text.iloc[0]
-        datatype = df.datatype.iloc[0]
+        datatype = eval(df.datatype.iloc[0])
         data = []
         if len(datatype)>0:
             for i in range(len(query_info)):
-                data.append(int(query_info[i]))
-                # if datatype[i]=='int':
-                # elif (type(query_info[i])=='str' and datatype[i]=='str') or (type(query_info[i])=='str' and datatype[i]=='date'):
-                #     data.append("'"+i+"'")
+                if datatype[i]=='int':
+                    data.append(int(query_info[i]))
+                elif datatype[i]=='str' or datatype[i]=='date':
+                    data.append("'"+query_info[i]+"'")
+        print(query, data)
         if '{}' in query:
             query = query.format(*tuple(data))
         return query
@@ -193,17 +194,17 @@ class ETL:
             cursor.close()
             connect.commit()
             connect.close()
-            return "Created Successfully"
+            return [["Created Successfully"]]
         elif "update" in query_name[0:6]:
             cursor.close()
             connect.commit()
             connect.close()
-            return "Updated Successfully"
+            return [["Updated Successfully"]]
         else:
             cursor.close()
             connect.commit()
             connect.close()
-            return "Deleted Successfully"
+            return [["Deleted Successfully"]]
 
     def getAPIs(self):
         df = pd.read_csv('./static/final1.csv')
@@ -215,6 +216,7 @@ class ETL:
             api = dict()
             api["name"] = names[i]
             api["details"] = details[i]
+            api["head"] = eval(details[i])
             api["datatype"] = datatypes[i]
             if "read" in api["name"]:
                 api["type"] = "read"

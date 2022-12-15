@@ -63,8 +63,8 @@ def connection():
         port=info.get('port')
         etl=ETL()
         # etl.dfconcat()
-        etl.executeAPISQL(username,password,host_url,database,query_name,port,query_info)
-        return {'username': username, 'password':password, 'database':database, 'host_url':host_url,'query_name':query_name,'port':port,'query_info':query_info}, status.HTTP_201_CREATED
+        output = etl.executeAPISQL(username,password,host_url,database,query_name,port,query_info)
+        return {"result": output}, status.HTTP_200_OK
     else:
         return status.HTTP_400_BAD_REQUEST
 
