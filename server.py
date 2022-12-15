@@ -27,20 +27,12 @@ def analysis():
     numeric = [len(create),len(read),len(update),len(delete),len(miscell)]
     return {'numeric': numeric}
 
-# @app.route('/table', methods=['GET'])
-# def tables():
-#     # import the module
-#     tables = 'table1'
-#     return {'tables':tables}
 
 @app.route('/time', methods=['GET'])
 def time():
-    # import the module
-    create = ['create time series']
-    read = ['read time series']
-    update = ['update time series']
-    delete = ['delete time series']
-    return {'create':create, 'read':read,'update':update,'delete':delete}
+    etl=ETL()
+    count = etl.predict()
+    return {'count':count}
 
 
 @app.route('/api', methods=['GET'])

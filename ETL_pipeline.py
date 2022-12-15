@@ -3,6 +3,7 @@ from analysis import get_csv
 import pandas as pd
 from cluster_SQL import splitter,gen_module
 import mysql.connector
+from predict import main
 
 class ETL:
     def __init__(self):
@@ -226,3 +227,7 @@ class ETL:
                 api["type"] = "delete"
             apis.append(api)
         return apis
+
+    def predict(self):
+       return main('./static/final1.csv')
+
