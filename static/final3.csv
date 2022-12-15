@@ -1,0 +1,8 @@
+,Unnamed: 0,text,datatype,name
+0,0,INSERT INTO Player  VALUES {}{}{}{}{}{},"['int', 'str', 'str', 'int', 'int', 'int']",createPlayer
+1,1,INSERT INTO MatchTable  VALUES {}{}{}{}{}{}{}{}{}{}{}{}{},"['int', 'int', 'int', 'str', 'int', 'int', 'int', 'int', 'int', 'str', 'int', 'str', 'str']",createMatchtable
+2,2,INSERT INTO Batsman_Scored  VALUES {}{}{}{}{},"['int', 'int', 'int', 'int', 'int']",createBatsman_scored
+3,3,INSERT INTO Player_MatchTable  VALUES {}{}{}{},"['int', 'int', 'int', 'int']",createPlayer_matchtable
+4,4,INSERT INTO Ball_by_Ball  VALUES {}{}{}{}{}{}{}{}{}{},"['int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int', 'int']",createBall_by_ball
+5,5,INSERT INTO Extra_Runs  VALUES {}{}{}{}{}{},"['int', 'int', 'int', 'int', 'int', 'int']",createExtra_runs
+6,6,INSERT INTO Wicket_Taken  VALUES {}{}{}{}{}{}{},"['int', 'int', 'int', 'int', 'int', 'str', 'int']",createWicket_taken
