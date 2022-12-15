@@ -3,6 +3,7 @@ from analysis import get_csv
 import pandas as pd
 from cluster_SQL import splitter,gen_module
 import mysql.connector
+from predict import main
 
 class ETL:
     def __init__(self):
@@ -46,6 +47,9 @@ class ETL:
             try:
                 final_api= gen_module(i)
                 final_api.to_csv(f'./static/final{splits.index(i)}.csv',index=False,header=True)
+                df = pd.read_csv((f'./static/final{splits.index(i)}.csv'))
+                df["name"] = df.apply(lambda _: ' ', axis=1)
+                df["detail"] = df.apply(lambda _: ' ', axis=1)
             except ValueError:
                 print('No values')
         etl.createNameSelectQuery()
@@ -135,7 +139,22 @@ class ETL:
                 name = name +'By'+ third[third.index('=')-1].capitalize()
         return name,first
 
-    
+
+    def createNameInsertQuery(self):
+        df = pd.read_csv('./static/final3.csv')
+        queries = df['text']
+        names = []
+        details = []
+        for i in queries:
+            name = 'create'
+            i = i.lower()
+            i = i.split()
+            name = name + i[i.index('into')+1].capitalize()
+            names.append(name)
+        print(names)
+        df['name'] = names
+        df.to_csv('./static/final3.csv')
+
     def removePunct(self,string):
         punc = "',!()-[];:\,/?@#$%^&*_~"
         for ele in string:
@@ -171,6 +190,7 @@ class ETL:
         if '{}' in query:
             query = query.format(*tuple(data))
         return query
+
 
     def executeAPISQL(self,username,password,host_url,database,query_name,port,query_info):
         connect = mysql.connector.connect(
@@ -228,3 +248,9 @@ class ETL:
                 api["type"] = "delete"
             apis.append(api)
         return apis
+
+    def predict(self):
+       return main('./static/final1.csv')
+
+etl = ETL()
+etl.createNameInsertQuery()
